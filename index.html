@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- 2025 by Thomas Colthurst -->
-<!-- Original at https://thomaswc.com/2025.html -->
-<!-- Released under a Creative Commons Share Alike with Attribution License -->
-<!-- See https://creativecommons.org/licenses/by-sa/4.0/ -->
+<!--
+    Based on "2025" by Thomas Colthurst (https://thomaswc.com/2025.html)
+    Original released under CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)
+    This modified version is also released under CC BY-SA 4.0.
+    Modifications: groups panel with drag-to-reorder, right-click deselect,
+                   user-named groups, sticky header, localStorage persistence.
+-->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -54,10 +57,25 @@
         .stat-pill strong { color: #1a1a1a; }
 
         .hint {
-            margin-left: auto;
             font-size: 0.72rem;
             color: #aaa;
             font-style: italic;
+        }
+
+        #attribution {
+            margin-left: auto;
+            font-size: 10px;
+            color: #bbb;
+            white-space: nowrap;
+        }
+
+        #attribution a {
+            color: #bbb;
+            text-decoration: underline;
+        }
+
+        #attribution a:hover {
+            color: #777;
         }
 
         /* ── Groups section ───────────────────────────────────── */
@@ -272,6 +290,7 @@
             <span class="stat-pill">Score: <strong id="score">0</strong></span>
             <span class="stat-pill">Mistakes: <strong id="mistakes">0</strong></span>
             <span class="hint">Right-click anywhere to deselect</span>
+            <span id="attribution">Based on "<a href="https://thomaswc.com/2025.html" target="_blank" rel="noopener">2025</a>" by Thomas Colthurst</span>
         </div>
         <div id="groups-section">
             <div id="groups-label">Groups</div>
