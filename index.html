@@ -279,7 +279,24 @@
 
         .shake { animation: shake 0.5s 1; }
 
-        /* ── Fireworks ───────────────────────────────────────── */
+        /* ── Group card tooltip ──────────────────────────────── */
+        #group-tooltip {
+            position: fixed;
+            background: #333;
+            color: #fff;
+            font-size: 0.65rem;
+            padding: 5px 8px;
+            border-radius: 5px;
+            white-space: normal;
+            width: 220px;
+            pointer-events: none;
+            z-index: 9999;
+            text-align: left;
+            line-height: 1.4;
+            display: none;
+        }
+
+/* ── Fireworks ───────────────────────────────────────── */
         #fireworks {
             position: fixed;
             top: 0; left: 0;
@@ -291,6 +308,7 @@
 </head>
 <body>
     <canvas id="fireworks"></canvas>
+    <div id="group-tooltip"></div>
 
     <div id="top-section">
         <div id="header">

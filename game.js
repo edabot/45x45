@@ -35,6 +35,30 @@ function shuffleArray(array) {
     }
 }
 
+// ── Tooltip ────────────────────────────────────────────────
+var tooltip = null;
+
+function initTooltip() {
+    tooltip = document.getElementById('group-tooltip');
+}
+
+function attachTooltip(card) {
+    card.addEventListener('mouseenter', function() {
+        var text = card.getAttribute('data-tooltip');
+        if (!text) return;
+        tooltip.textContent = text;
+        tooltip.style.display = 'block';
+        var rect = card.getBoundingClientRect();
+        var left = rect.left + rect.width / 2 - 110;
+        left = Math.max(8, Math.min(left, window.innerWidth - 228));
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = (rect.bottom + 6) + 'px';
+    });
+    card.addEventListener('mouseleave', function() {
+        tooltip.style.display = 'none';
+    });
+}
+
 // ── Deselect ───────────────────────────────────────────────
 function deselect() {
     if (selected) {
@@ -67,14 +91,19 @@ function updateGroupCard(card) {
             '<span class="card-count">&#10003; All 45 found!</span>';
     } else {
         var preview = card.cluster.join(', ');
-        var pct = (card.cluster.length / 45 * 100).toFixed(1);
-        card.innerHTML =
+        var header =
             '<span class="card-header">' +
                 '<span class="card-name">' + name + '</span>' +
                 '<span class="card-edit-btn" onclick="editGroupName(event, this)">edit</span>' +
-                '<span class="card-count">' + card.cluster.length + '/45</span>'+
-            '</span>' +
-            '<span class="card-preview">' + preview + '</span>';
+                '<span class="card-count">' + card.cluster.length + '/45</span>' +
+            '</span>';
+        if (card.customName) {
+            card.setAttribute('data-tooltip', preview);
+            card.innerHTML = header;
+        } else {
+            card.removeAttribute('data-tooltip');
+            card.innerHTML = header + '<span class="card-preview">' + preview + '</span>';
+        }
     }
 }
 
@@ -225,6 +254,7 @@ function doMerge(a, b) {
         survivor.classList.remove('cell-button');
         survivor.classList.add('group-card');
         initDragOnCard(survivor);
+        attachTooltip(survivor);
         container.appendChild(survivor);
     }
 
@@ -373,6 +403,7 @@ function loadState() {
             card.isGroupCard = true;
             attachClickHandler(card);
             initDragOnCard(card);
+            attachTooltip(card);
             updateGroupCard(card);
             container.appendChild(card);
         });
@@ -475,6 +506,7 @@ function startFireworks() {
 }
 
 // ── Init ──────────────────────────────────────────────────
+initTooltip();
 checkCategories();
 setUpBoard();
 loadState();
