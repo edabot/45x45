@@ -279,6 +279,26 @@
 
         .shake { animation: shake 0.5s 1; }
 
+        /* ── Color swatches ──────────────────────────────────── */
+        .card-color-swatches {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .card-color-swatch {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            cursor: pointer;
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+
+        .card-color-swatch:hover,
+        .card-color-swatch.active { border-color: #444; }
+
         /* ── Group card tooltip ──────────────────────────────── */
         #group-tooltip {
             position: fixed;

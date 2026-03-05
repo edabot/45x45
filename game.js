@@ -78,10 +78,12 @@ function groupDisplayName(card) {
     return card.customName || ('Group ' + card.groupNumber);
 }
 
+var CARD_COLORS = ['#dbeafe', '#dcfce7', '#fef9c3', '#fce7f3', '#ffffff'];
+
 function updateGroupCard(card) {
     var name = groupDisplayName(card);
     if (card.cluster.length === 45) {
-        card.style.background = stringToLightColor(card.category);
+        card.style.background = card.customColor || stringToLightColor(card.category);
         card.classList.add('completed');
         card.disabled = true;
         card.innerHTML =
@@ -97,6 +99,7 @@ function updateGroupCard(card) {
                 '<span class="card-edit-btn" onclick="editGroupName(event, this)">edit</span>' +
                 '<span class="card-count">' + card.cluster.length + '/45</span>' +
             '</span>';
+        card.style.background = card.customColor || '';
         if (card.customName) {
             card.setAttribute('data-tooltip', preview);
             card.innerHTML = header;
@@ -121,7 +124,35 @@ function editGroupName(evt, editSpan) {
     input.focus();
     input.select();
 
+    // Color swatches
+    var swatchRow = document.createElement('span');
+    swatchRow.className = 'card-color-swatches';
+    swatchRow.addEventListener('click', function(e) { e.stopPropagation(); });
+    CARD_COLORS.forEach(function(color) {
+        var sw = document.createElement('span');
+        sw.className = 'card-color-swatch';
+        sw.style.background = color;
+        if (card.customColor === color) sw.classList.add('active');
+        sw.addEventListener('mousedown', function(e) {
+            e.preventDefault(); // keep focus on input
+            e.stopPropagation();
+            if (card.customColor === color) {
+                card.customColor = null;
+                card.style.background = '';
+                sw.classList.remove('active');
+            } else {
+                card.customColor = color;
+                card.style.background = color;
+                swatchRow.querySelectorAll('.card-color-swatch').forEach(function(s) { s.classList.remove('active'); });
+                sw.classList.add('active');
+            }
+        });
+        swatchRow.appendChild(sw);
+    });
+    card.appendChild(swatchRow);
+
     function commit() {
+        swatchRow.remove();
         var newName = input.value.trim();
         card.customName = newName || null;
         updateGroupCard(card);
@@ -130,7 +161,7 @@ function editGroupName(evt, editSpan) {
 
     input.addEventListener('keydown', function(e) {
         if (e.key === 'Enter')  { e.stopPropagation(); input.blur(); }
-        if (e.key === 'Escape') { e.stopPropagation(); card.customName = card.customName; updateGroupCard(card); }
+        if (e.key === 'Escape') { e.stopPropagation(); swatchRow.remove(); updateGroupCard(card); }
     });
     input.addEventListener('blur', commit);
     input.addEventListener('click', function(e) { e.stopPropagation(); });
@@ -346,7 +377,8 @@ function saveState() {
             category:    card.category,
             cluster:     card.cluster,
             groupNumber: card.groupNumber,
-            customName:  card.customName || null
+            customName:  card.customName  || null,
+            customColor: card.customColor || null
         });
     });
     localStorage.setItem('groupsData', JSON.stringify(groupsData));
@@ -399,7 +431,8 @@ function loadState() {
             card.category    = g.category;
             card.cluster     = g.cluster;
             card.groupNumber = g.groupNumber;
-            card.customName  = g.customName || null;
+            card.customName  = g.customName  || null;
+            card.customColor = g.customColor || null;
             card.isGroupCard = true;
             attachClickHandler(card);
             initDragOnCard(card);
