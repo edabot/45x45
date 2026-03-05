@@ -72,10 +72,9 @@ function updateGroupCard(card) {
             '<span class="card-header">' +
                 '<span class="card-name">' + name + '</span>' +
                 '<span class="card-edit-btn" onclick="editGroupName(event, this)">edit</span>' +
+                '<span class="card-count">' + card.cluster.length + '/45</span>'+
             '</span>' +
-            '<span class="card-preview">' + preview + '</span>' +
-            '<span class="card-progress"><span class="card-progress-bar" style="width:' + pct + '%"></span></span>' +
-            '<span class="card-count">' + card.cluster.length + '/45</span>';
+            '<span class="card-preview">' + preview + '</span>';
     }
 }
 
