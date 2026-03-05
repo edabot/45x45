@@ -148,7 +148,8 @@
             box-shadow: 4px 0 0 0 #444;
         }
 
-        .card-header {
+
+.card-header {
             display: flex;
             align-items: baseline;
             gap: 5px;
@@ -292,6 +293,7 @@
             <h1>45&times;45</h1>
             <span class="stat-pill">Score: <strong id="score">0</strong></span>
             <span class="stat-pill">Mistakes: <strong id="mistakes">0</strong></span>
+            <button id="deselect-btn" onclick="deselect()" style="font-size:0.8rem;padding:3px 10px;cursor:pointer;border:1px solid #ccc;border-radius:12px;background:white;">Deselect</button>
             <span class="hint">Right-click anywhere to deselect</span>
             <span id="attribution">Based on "<a href="https://thomaswc.com/2025.html" target="_blank" rel="noopener">2025</a>" by Thomas Colthurst</span>
         </div>
