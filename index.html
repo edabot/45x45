@@ -217,25 +217,27 @@
             padding: 10px;
         }
 
-        #the_table {
-            border-collapse: collapse;
+        #the_board {
+            display: flex;
+            flex-wrap: wrap;
         }
 
-        #the_table td {
+        .cell {
+            width: 120px;
             padding: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
         }
 
         .cell-button {
-            display: block;
-            width: 100%;
+            display: inline-block;
             padding: 3px 5px;
-            font-size: 0.62rem;
+            font-size: 0.875rem;
             cursor: pointer;
             border: 1px solid #d8d8d8;
             background: white;
             border-radius: 4px;
-            min-width: 80px;
-            max-width: 250px;
             white-space: normal;
             word-break: break-word;
             text-align: center;
@@ -246,6 +248,7 @@
 
         .cell-button:hover:not(:disabled) {
             background: #f0f2f5;
+            font-weight: bold;
             border-color: #aaa;
         }
 
@@ -655,7 +658,7 @@
             if (absorbed.isGroupCard) {
                 absorbed.remove();
             } else {
-                absorbed.parentElement.remove(); // remove <td>
+                absorbed.parentElement.remove(); // remove .cell
             }
 
             // If survivor is still on the board, move it to groups section
@@ -665,7 +668,7 @@
                 groupCounter++;
                 survivor.groupNumber = groupCounter;
                 survivor.customName  = survivor.customName || null;
-                survivor.parentElement.remove(); // remove <td>
+                survivor.parentElement.remove(); // remove .cell
                 survivor.classList.remove('cell-button');
                 survivor.classList.add('group-card');
                 initDragOnCard(survivor);
@@ -711,38 +714,30 @@
 
         // ── Build the DOM board (empty cells) ─────────────────────
         function setUpBoard() {
-            var table = document.createElement('table');
-            table.id = 'the_table';
-            for (var i = 0; i < M; i++) {
-                var tr = document.createElement('tr');
-                for (var j = 0; j < M; j++) {
-                    var td = document.createElement('td');
-                    var btn = document.createElement('button');
-                    btn.className = 'cell-button';
-                    btn.isGroupCard = false;
-                    attachClickHandler(btn);
-                    td.appendChild(btn);
-                    tr.appendChild(td);
-                }
-                table.appendChild(tr);
+            var board = document.createElement('div');
+            board.id = 'the_board';
+            for (var i = 0; i < M * M; i++) {
+                var cell = document.createElement('div');
+                cell.className = 'cell';
+                var btn = document.createElement('button');
+                btn.className = 'cell-button';
+                btn.isGroupCard = false;
+                attachClickHandler(btn);
+                cell.appendChild(btn);
+                board.appendChild(cell);
             }
-            document.getElementById('board').appendChild(table);
+            document.getElementById('board').appendChild(board);
         }
 
         // ── Fill board cells with shuffled words ──────────────────
         function putWordsInBoard() {
             shuffleArray(wordlist);
-            var idx = 0;
-            var table = document.getElementById('the_table');
-            for (var i = 0; i < table.rows.length; i++) {
-                var row = table.rows[i];
-                for (var j = 0; j < row.cells.length; j++) {
-                    var btn = row.cells[j].firstElementChild;
-                    btn.textContent = wordlist[idx][0];
-                    btn.category    = wordlist[idx][1];
-                    btn.cluster     = [wordlist[idx][0]];
-                    idx++;
-                }
+            var cells = document.querySelectorAll('#the_board .cell');
+            for (var i = 0; i < cells.length; i++) {
+                var btn = cells[i].firstElementChild;
+                btn.textContent = wordlist[i][0];
+                btn.category    = wordlist[i][1];
+                btn.cluster     = [wordlist[i][0]];
             }
         }
 
@@ -754,16 +749,11 @@
 
             // Board: save remaining word/category pairs in DOM order
             var boardWords = [];
-            var table = document.getElementById('the_table');
-            for (var i = 0; i < table.rows.length; i++) {
-                var row = table.rows[i];
-                for (var j = 0; j < row.cells.length; j++) {
-                    var btn = row.cells[j].firstElementChild;
-                    if (btn && btn.textContent && btn.category) {
-                        boardWords.push({ word: btn.textContent, category: btn.category });
-                    }
+            document.querySelectorAll('#the_board .cell-button').forEach(function(btn) {
+                if (btn.textContent && btn.category) {
+                    boardWords.push({ word: btn.textContent, category: btn.category });
                 }
-            }
+            });
             localStorage.setItem('boardWords', JSON.stringify(boardWords));
 
             // Groups: save category, cluster, groupNumber, customName
@@ -802,13 +792,7 @@
             var boardWords = JSON.parse(boardWordsStr);
 
             // Collect all cells, fill with saved words, remove extras
-            var cells = [];
-            var table = document.getElementById('the_table');
-            for (var i = 0; i < table.rows.length; i++) {
-                for (var j = 0; j < table.rows[i].cells.length; j++) {
-                    cells.push(table.rows[i].cells[j]);
-                }
-            }
+            var cells = Array.from(document.querySelectorAll('#the_board .cell'));
             for (var ci = 0; ci < cells.length; ci++) {
                 if (ci < boardWords.length) {
                     var btn = cells[ci].firstElementChild;
@@ -817,12 +801,6 @@
                     btn.cluster     = [boardWords[ci].word];
                 } else {
                     cells[ci].remove();
-                }
-            }
-            // Remove any rows that are now empty
-            for (var ri = table.rows.length - 1; ri >= 0; ri--) {
-                if (table.rows[ri].cells.length === 0) {
-                    table.rows[ri].remove();
                 }
             }
 
