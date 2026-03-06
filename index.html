@@ -97,7 +97,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 7px;
-            padding: 0 16px 12px;
+            padding: 4px 16px 12px;
             max-height: 220px;
             overflow-y: auto;
         }
@@ -106,6 +106,7 @@
             display: inline-flex;
             flex-direction: column;
             align-items: flex-start;
+            position: relative;
             border: 2px solid #d0d0d0;
             border-radius: 9px;
             padding: 7px 11px;
@@ -155,24 +156,33 @@
             align-items: baseline;
             gap: 5px;
             margin-bottom: 2px;
+            width: 100%;
         }
 
         .card-name {
             font-weight: 700;
             font-size: 0.78rem;
             color: #111;
+            flex: 1;
+            min-width: 0;
         }
 
         .card-edit-btn {
-            font-size: 0.6rem;
-            color: #bbb;
+            position: absolute;
+            bottom: 5px;
+            right: 8px;
+            font-size: 0.75rem;
+            color: #aaa;
             cursor: pointer;
-            text-decoration: underline;
             user-select: none;
-            flex-shrink: 0;
+            line-height: 1;
+            opacity: 0;
+            transition: opacity 0.1s;
         }
 
-        .card-edit-btn:hover { color: #555; }
+        .group-card:hover .card-edit-btn { opacity: 1; }
+        .group-card.editing .card-edit-btn { opacity: 0; pointer-events: none; }
+        .card-edit-btn:hover { color: #444; }
 
         .card-name-input {
             font-size: 0.78rem;
@@ -211,8 +221,13 @@
         }
 
         .card-count {
-            font-size: 0.65rem;
+            font-size: 0.7rem;
+            font-weight: 700;
             color: #888;
+            width: 1.8em;
+            text-align: right;
+            flex-shrink: 0;
+            margin-left: auto;
         }
 
         .group-card.completed .card-count { color: inherit; }
@@ -253,7 +268,7 @@
 
         .cell-button:hover:not(:disabled) {
             background: #f0f2f5;
-            font-weight: bold;
+            text-shadow: 0 0 0.4px currentColor, 0 0 0.4px currentColor;
             border-color: #aaa;
         }
 
@@ -340,7 +355,6 @@
             <span id="attribution">Based on "<a href="https://thomaswc.com/2025.html" target="_blank" rel="noopener">2025</a>" by Thomas Colthurst</span>
         </div>
         <div id="groups-section">
-            <div id="groups-label">Groups</div>
             <div id="groups-container"></div>
         </div>
     </div>

@@ -78,7 +78,7 @@ function groupDisplayName(card) {
     return card.customName || ('Group ' + card.groupNumber);
 }
 
-var CARD_COLORS = ['#dbeafe', '#dcfce7', '#fef9c3', '#fce7f3', '#ffffff'];
+var CARD_COLORS = ['#dbeafe', '#dcfce7', '#fef9c3', '#fce7f3', '#fed7aa', '#ede9fe', '#ccfbf1', '#ffffff'];
 
 function updateGroupCard(card) {
     var name = groupDisplayName(card);
@@ -96,9 +96,9 @@ function updateGroupCard(card) {
         var header =
             '<span class="card-header">' +
                 '<span class="card-name">' + name + '</span>' +
-                '<span class="card-edit-btn" onclick="editGroupName(event, this)">edit</span>' +
-                '<span class="card-count">' + card.cluster.length + '/45</span>' +
-            '</span>';
+                '<span class="card-count">' + card.cluster.length + '</span>' +
+            '</span>' +
+            '<span class="card-edit-btn" onclick="editGroupName(event, this)">✎</span>';
         card.style.background = card.customColor || '';
         if (card.customName) {
             card.setAttribute('data-tooltip', preview);
@@ -114,6 +114,8 @@ function updateGroupCard(card) {
 function editGroupName(evt, editSpan) {
     evt.stopPropagation();
     var card = editSpan.closest('.group-card');
+    if (selected === card) deselect();
+    card.classList.add('editing');
     var nameSpan = card.querySelector('.card-name');
     var currentName = groupDisplayName(card);
 
@@ -152,6 +154,7 @@ function editGroupName(evt, editSpan) {
     card.appendChild(swatchRow);
 
     function commit() {
+        card.classList.remove('editing');
         swatchRow.remove();
         var newName = input.value.trim();
         card.customName = newName || null;
@@ -160,8 +163,12 @@ function editGroupName(evt, editSpan) {
     }
 
     input.addEventListener('keydown', function(e) {
+        if (e.key === ' ')      { e.stopPropagation(); }
         if (e.key === 'Enter')  { e.stopPropagation(); input.blur(); }
-        if (e.key === 'Escape') { e.stopPropagation(); swatchRow.remove(); updateGroupCard(card); }
+        if (e.key === 'Escape') { e.stopPropagation(); card.classList.remove('editing'); swatchRow.remove(); updateGroupCard(card); }
+    });
+    input.addEventListener('keyup', function(e) {
+        if (e.key === ' ') { e.stopPropagation(); e.preventDefault(); }
     });
     input.addEventListener('blur', commit);
     input.addEventListener('click', function(e) { e.stopPropagation(); });
