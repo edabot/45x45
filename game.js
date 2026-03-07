@@ -8,6 +8,7 @@ var selected = null;
 var groupCounter = 0;
 var dragSrcCard = null;
 var wordlist = [];
+var winScore = 0;
 
 // ── Helpers ────────────────────────────────────────────────
 function stringToLightColor(str) {
@@ -82,15 +83,17 @@ var CARD_COLORS = ['#dbeafe', '#dcfce7', '#fef9c3', '#fce7f3', '#fed7aa', '#ede9
 
 function updateGroupCard(card) {
     var name = groupDisplayName(card);
-    if (card.cluster.length === 45) {
-        card.style.background = card.customColor || stringToLightColor(card.category);
+    if (card.cluster.length === cats[card.category].length) {
+        card.style.background = card.customColor || '';
         card.classList.add('completed');
         card.disabled = true;
+        var preview = card.cluster.join(', ');
+        card.setAttribute('data-tooltip', preview);
         card.innerHTML =
             '<span class="card-header">' +
                 '<span class="card-name">' + name + '</span>' +
-            '</span>' +
-            '<span class="card-count">&#10003; All 45 found!</span>';
+                '<span class="card-count"><b>&#10003;</b></span>' +
+            '</span>';
     } else {
         var preview = card.cluster.join(', ');
         var header =
@@ -308,10 +311,84 @@ function doMerge(a, b) {
 
     saveState();
 
-    if (score === 1980) {
-        setTimeout(function() { alert('You win!!'); }, 200);
+    if (score === winScore) {
         startFireworks();
     }
+}
+
+// ── Seed near-complete state for testing ──────────────────
+function seedTestState() {
+    deselect();
+
+    var container = document.getElementById('groups-container');
+    container.innerHTML = '';
+    document.getElementById('the_board').innerHTML = '';
+    groupCounter = 0;
+    score = 0;
+    mistakes = 0;
+
+    var categories = Object.keys(cats);
+    var lastCat = categories[categories.length - 1];
+
+    categories.forEach(function(cat) {
+        var words = cats[cat];
+        var isLast = cat === lastCat;
+        groupCounter++;
+
+        if (isLast) {
+            // One word stays on the board
+            var cell = document.createElement('div');
+            cell.className = 'cell';
+            var btn = document.createElement('button');
+            btn.className = 'cell-button';
+            btn.isGroupCard = false;
+            btn.textContent = words[0];
+            btn.category = cat;
+            btn.cluster = [words[0]];
+            attachClickHandler(btn);
+            cell.appendChild(btn);
+            document.getElementById('the_board').appendChild(cell);
+
+            // Group card with the other 44 words
+            var card = document.createElement('button');
+            card.className = 'group-card';
+            card.category = cat;
+            card.cluster = words.slice(1);
+            card.groupNumber = groupCounter;
+            card.customName = null;
+            card.customColor = null;
+            card.isGroupCard = true;
+            attachClickHandler(card);
+            initDragOnCard(card);
+            attachTooltip(card);
+            updateGroupCard(card);
+            container.appendChild(card);
+
+            score += words.length - 2; // 43 merges
+        } else {
+            // Fully completed group card
+            var card = document.createElement('button');
+            card.className = 'group-card';
+            card.category = cat;
+            card.cluster = words.slice();
+            card.groupNumber = groupCounter;
+            card.customName = null;
+            card.customColor = null;
+            card.isGroupCard = true;
+            attachClickHandler(card);
+            initDragOnCard(card);
+            attachTooltip(card);
+            updateGroupCard(card);
+            container.appendChild(card);
+
+            score += words.length - 1; // 44 merges
+        }
+    });
+
+    document.getElementById('score').textContent = score;
+    document.getElementById('mistakes').textContent = mistakes;
+    document.getElementById('groups-section').style.display = 'block';
+    saveState();
 }
 
 // ── Check categories data ─────────────────────────────────
@@ -319,10 +396,8 @@ function checkCategories() {
     var wordDict = new Map();
     for (var key in cats) {
         var value = cats[key];
-        if (value.length < 45) {
-            alert('Entry for ' + key + ' has length ' + value.length);
-        }
-        for (var i = 0; i < 45; i++) {
+        winScore += value.length - 1;
+        for (var i = 0; i < value.length; i++) {
             wordlist.push([value[i], key]);
             if (wordDict.has(value[i])) {
                 alert('Duplicate word: ' + value[i]);
@@ -337,7 +412,7 @@ function checkCategories() {
 function setUpBoard() {
     var board = document.createElement('div');
     board.id = 'the_board';
-    for (var i = 0; i < M * M; i++) {
+    for (var i = 0; i < wordlist.length; i++) {
         var cell = document.createElement('div');
         cell.className = 'cell';
         var btn = document.createElement('button');
@@ -544,6 +619,36 @@ function startFireworks() {
     }
     loop();
 }
+
+// ── TEMP TEST: seed one group with 44/45 items ────────────
+function seedTestStateOne() {
+    var testCat = 'Elements';
+    var items = cats[testCat];
+    var cluster = items.slice(0, 44);
+
+    var boardWords = [];
+    for (var key in cats) {
+        var arr = cats[key];
+        var start = (key === testCat) ? 44 : 0; // skip first 44 Elements; "Palladium" stays on board
+        for (var i = start; i < arr.length; i++) {
+            boardWords.push({ word: arr[i], category: key });
+        }
+    }
+    shuffleArray(boardWords);
+
+    localStorage.setItem('score', '43');
+    localStorage.setItem('mistakes', '0');
+    localStorage.setItem('boardWords', JSON.stringify(boardWords));
+    localStorage.setItem('groupsData', JSON.stringify([{
+        category: testCat,
+        cluster: cluster,
+        groupNumber: 1,
+        customName: null,
+        customColor: null
+    }]));
+    localStorage.setItem('groupCounter', '1');
+}
+// seedTestStateOne(); // ← uncomment to reset to test state, then reload
 
 // ── Init ──────────────────────────────────────────────────
 initTooltip();
