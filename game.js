@@ -622,33 +622,65 @@ function startFireworks() {
 
 // ── TEMP TEST: seed one group with 44/45 items ────────────
 function seedTestStateOne() {
-    var testCat = 'Elements';
-    var items = cats[testCat];
-    var cluster = items.slice(0, 44);
+    deselect();
 
+    var container = document.getElementById('groups-container');
+    container.innerHTML = '';
+    document.getElementById('the_board').innerHTML = '';
+    groupCounter = 0;
+    score = 0;
+    mistakes = 0;
+
+    var testCat = 'Elements';
+
+    // Build board words: all categories fully on board except testCat (first 44 words go to group)
     var boardWords = [];
     for (var key in cats) {
         var arr = cats[key];
-        var start = (key === testCat) ? 44 : 0; // skip first 44 Elements; "Palladium" stays on board
+        var start = (key === testCat) ? 44 : 0;
         for (var i = start; i < arr.length; i++) {
             boardWords.push({ word: arr[i], category: key });
         }
     }
     shuffleArray(boardWords);
 
-    localStorage.setItem('score', '43');
-    localStorage.setItem('mistakes', '0');
-    localStorage.setItem('boardWords', JSON.stringify(boardWords));
-    localStorage.setItem('groupsData', JSON.stringify([{
-        category: testCat,
-        cluster: cluster,
-        groupNumber: 1,
-        customName: null,
-        customColor: null
-    }]));
-    localStorage.setItem('groupCounter', '1');
+    var board = document.getElementById('the_board');
+    boardWords.forEach(function(w) {
+        var cell = document.createElement('div');
+        cell.className = 'cell';
+        var btn = document.createElement('button');
+        btn.className = 'cell-button';
+        btn.isGroupCard = false;
+        btn.textContent = w.word;
+        btn.category = w.category;
+        btn.cluster = [w.word];
+        attachClickHandler(btn);
+        cell.appendChild(btn);
+        board.appendChild(cell);
+    });
+
+    // Group card with first 44 Elements
+    groupCounter++;
+    var card = document.createElement('button');
+    card.className = 'group-card';
+    card.category = testCat;
+    card.cluster = cats[testCat].slice(0, 44);
+    card.groupNumber = groupCounter;
+    card.customName = null;
+    card.customColor = null;
+    card.isGroupCard = true;
+    attachClickHandler(card);
+    initDragOnCard(card);
+    attachTooltip(card);
+    updateGroupCard(card);
+    container.appendChild(card);
+
+    score = 43;
+    document.getElementById('score').textContent = score;
+    document.getElementById('mistakes').textContent = mistakes;
+    document.getElementById('groups-section').style.display = 'block';
+    saveState();
 }
-// seedTestStateOne(); // ← uncomment to reset to test state, then reload
 
 // ── Init ──────────────────────────────────────────────────
 initTooltip();
